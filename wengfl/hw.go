@@ -6,5 +6,12 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello World!")
+	// fmt.Println("Hello World!")
+	ff()
+}
+
+func ff() {
+	for i := 0; i < 10; i++ {
+		fmt.Println(i)
+	}
 }
