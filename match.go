@@ -77,6 +77,10 @@ func CheckPriceCanDeal(ordrDir int, ordrPrc int, bkPrc int) bool {
 	}
 	return false
 }
+func CheckAccountCanDeal(ordrAcnt int,bkAcnt int) bool{
+	if ordrAcnt==bkAcnt {return false}
+	return true
+}
 
 func match(ordr *Order) {
 	var trd Trade
@@ -108,6 +112,10 @@ func match(ordr *Order) {
 			//isTrade = true
 			for node := pList.Front(); node != nil; node = node.Next() {
 				o := node.Value.(*Order)
+                if !CheckAccountCanDeal(ordr.trdngAcntCd,o.trdngAcntCd) {
+                	fmt.Printf("same trading account,skip\n")
+                	continue
+                }
 				if o.vol >= ordr.vol { // 订单完全成交
 					trd.vol += ordr.vol
 					o.vol -= ordr.vol

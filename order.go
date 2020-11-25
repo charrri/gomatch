@@ -1,5 +1,4 @@
 package main
-
 import (
 	"fmt"
 	"math/rand"
@@ -40,7 +39,7 @@ func main() {
 
 	for i := 0; i < 20; i++ {
 		ordr := &Order{
-			trdngAcntCd: 100001,
+			trdngAcntCd: 100001+ rand.Intn(10),
 			bondCd:      5,
 			price:       90 + rand.Intn(10),
 			//price: 90,
