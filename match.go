@@ -42,8 +42,8 @@ func AddOrder(ordr *Order) {
 		//to do del txnlog msg
 	}
 
-	ShowPrcLink(BUY, ordr.bondCd)
-	ShowPrcLink(SELL, ordr.bondCd)
+	//ShowPrcLink(BUY, ordr.bondCd)
+	//ShowPrcLink(SELL, ordr.bondCd)
 }
 
 func addOrdrToSameDir(ordr *Order) {
@@ -117,7 +117,7 @@ func match(ordr *Order) {
 					}
 
 					//trade(ordr, o, &trd) // to do
-					fmt.Printf("Trade: %v\n", trd)
+					//fmt.Printf("Trade: %v\n", trd)
 					return
 				} else {
 					trd.vol += ordr.vol
