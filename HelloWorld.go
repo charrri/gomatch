@@ -1,7 +1,7 @@
 package main
 import "fmt"
 
-func main() {
+func main_wt_1() {
 	fmt.Println("Hello, World!")
 	
 	var a int32 = 1

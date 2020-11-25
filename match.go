@@ -34,9 +34,16 @@ var prcLinks [2]map[int]*treemap.Map // int.List
 //var prcLinks *treemap.Map
 
 func AddOrder(ordr *Order) {
-	if !match(ordr) {
+	match(ordr)
+	if (ordr.vol > 0) {
 		addOrdrToSameDir(ordr)
+	}else {
+		//to do trd txnlog msg
+		//to do del txnlog msg
 	}
+
+	ShowPrcLink(BUY, ordr.bondCd)
+	ShowPrcLink(SELL, ordr.bondCd)
 }
 
 func addOrdrToSameDir(ordr *Order) {
@@ -71,11 +78,10 @@ func CheckPriceCanDeal(ordrDir int, ordrPrc int, bkPrc int) bool {
 	return false
 }
 
-func match(ordr *Order) bool {
+func match(ordr *Order) {
 	var trd Trade
 	var key int
 	var li *list.List
-	var isTrade = false
 	d := reverseDir(ordr.dir)
 
 	prcLink := prcLinks[d][ordr.bondCd]
@@ -83,14 +89,14 @@ func match(ordr *Order) bool {
 	if d == BUY { // 最优价
 		k, v := prcLink.Max()
 		if k == nil {
-			return false
+			return
 		}
 		key = k.(int)
 		li = v.(*list.List)
 	} else {
 		k, v := prcLink.Min()
 		if k == nil {
-			return false
+			return
 		}
 		key = k.(int)
 		li = v.(*list.List)
@@ -99,20 +105,20 @@ func match(ordr *Order) bool {
 	for {
 		if CheckPriceCanDeal(ordr.dir, ordr.price, key) {
 			pList := li
-			isTrade = true
+			//isTrade = true
 			for node := pList.Front(); node != nil; node = node.Next() {
 				o := node.Value.(*Order)
 				if o.vol >= ordr.vol { // 订单完全成交
 					trd.vol += ordr.vol
 					o.vol -= ordr.vol
-
+					ordr.vol = 0
 					if o.vol == 0 {
 						pList.Remove(node) //
 					}
 
 					//trade(ordr, o, &trd) // to do
 					fmt.Printf("Trade: %v\n", trd)
-					return true
+					return
 				} else {
 					trd.vol += ordr.vol
 					ordr.vol -= o.vol
@@ -123,11 +129,11 @@ func match(ordr *Order) bool {
 
 			// 此价格成交完
 		} else {
-			return isTrade
+			return
 		}
-		key, li = getNextPriceLink(ordr.dir, key, prcLink)
+		key, li = getOrdrBkNextPriceLinkByInOrdrDir(ordr.dir, key, prcLink)
 		if li == nil {
-			return isTrade
+			return
 		}
 	}
 
@@ -136,13 +142,23 @@ func match(ordr *Order) bool {
 
 	// }
 
-	return isTrade
+	return
+}
+
+func getOrdrBkNextPriceLinkByInOrdrDir(dir int, prc int, m *treemap.Map) (int, *list.List) {
+	var dir_ int
+	if (dir == BUY) {
+		dir_ = SELL
+	}else {
+		dir_ = BUY
+	}
+	return getNextPriceLink(dir_, prc, m)
 }
 
 func getNextPriceLink(dir int, prc int, m *treemap.Map) (int, *list.List) {
 	var key int
 	var li *list.List
-	if dir == BUY {
+	if dir == SELL {
 		k, v := m.Ceiling(prc + 1)
 		if nil == k {
 			return 0, nil
@@ -194,4 +210,68 @@ func testmain() {
 		fmt.Println(k, v)
 	}
 	fmt.Printf("%T", m)
+}
+
+func ShowPrcLink(dir int, bondCd int) {
+	prcLink := prcLinks[dir][bondCd]
+	var key int
+	var li *list.List
+
+	if dir == BUY { // 最优价
+		k, v := prcLink.Max()
+		if k == nil {
+			return
+		}
+		key = k.(int)
+		li = v.(*list.List)
+		ShowOrdrLink(li)
+	} else {
+		k, v := prcLink.Min()
+		if k == nil {
+			return
+		}
+		key = k.(int)
+		li = v.(*list.List)
+		ShowOrdrLink(li)
+	}
+	for {
+		if key, li = getNextPriceLink(1-dir, key, prcLink); li == nil {
+			return
+		}
+		ShowOrdrLink(li)
+	}
+}
+
+func ShowOrdrLink(node *list.List) {
+	head := node.Front()
+	if head != nil {
+		o := head.Value.(*Order)
+		PrintPriceLeader(o)
+	}else {
+		return
+	}
+
+	for {
+		if (head == nil) {
+			fmt.Println()
+			break
+		}
+		o := head.Value.(*Order)
+		PrintOrdr(o)
+		head = head.Next()
+	}
+}
+
+func PrintPriceLeader(ordr *Order) {
+	var dir string;
+	if ordr.dir == 1 {
+		dir = "Sell"
+	}else {
+		dir = "Buy"
+	}
+	fmt.Printf("{bondCd:%d, prc:%d, dir:%s}\n", ordr.bondCd, ordr.price, dir)
+}
+
+func PrintOrdr(ordr *Order) {
+	fmt.Printf("[AcntCd:%d, Vol:%d]", ordr.trdngAcntCd, ordr.vol)//to do ordrCd
 }

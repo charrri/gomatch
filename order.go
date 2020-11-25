@@ -47,7 +47,7 @@ func main() {
 			vol: 1000000 + 1000000*rand.Intn(5),
 			dir: rand.Intn(2)}
 
-		fmt.Printf("new order dir=%d, price=%d, vol=%d\n", ordr.dir, ordr.price, ordr.vol)
+		fmt.Printf("new order dir=%d, price=%d, vol=%d, addr=%p\n", ordr.dir, ordr.price, ordr.vol, ordr)
 		AddOrder(ordr)
 	}
 
