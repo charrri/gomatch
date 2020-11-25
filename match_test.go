@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"testing"
+	"time"
 )
 
 /*
@@ -11,6 +12,12 @@ cmd:
 	go test -bench=.
  */
 func BenchmarkAddOrder(B *testing.B) {
+	for i := range bondChs {
+		bondChs[i] = make(chan *Order, 10000)
+		go AddOrdrMpi(bondChs[i])
+	}
+	var cnt uint64 = 0
+
 	for i:=0;i<B.N;i++ {
 		ordr := &Order{
 			trdngAcntCd: 100000 + rand.Intn(100000),
@@ -20,6 +27,17 @@ func BenchmarkAddOrder(B *testing.B) {
 			vol: 1000000 + 1000000*rand.Intn(5),
 			dir: rand.Intn(2)}
 		//fmt.Printf("new order dir=%d, price=%d, vol=%d, addr=%p\n", ordr.dir, ordr.price, ordr.vol, ordr)
-		AddOrder(ordr)
+		//AddOrder(ordr)
+		bondChs[ordr.bondCd-1] <- ordr
+		cnt++
 	}
+
+	for {
+		if (ops >= cnt) {
+			break
+		}
+		time.Sleep(time.Millisecond*100)
+	}
+
+	//time.Sleep(time.Millisecond * 10000)
 }

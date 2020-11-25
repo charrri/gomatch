@@ -27,6 +27,7 @@ const (
 	BUY        = 0
 	SELL       = 1
 	PRDUCT_NUM = 20 // 合约数量
+	ORDR_NUM   = 10000
 )
 
 var prcLinks [2]map[int]*treemap.Map // int.List
@@ -113,7 +114,7 @@ func match(ordr *Order) {
 			for node := pList.Front(); node != nil; node = node.Next() {
 				o := node.Value.(*Order)
                 if !CheckAccountCanDeal(ordr.trdngAcntCd,o.trdngAcntCd) {
-                	fmt.Printf("same trading account,skip\n")
+                	//fmt.Printf("same trading account,skip\n")
                 	continue
                 }
 				if o.vol >= ordr.vol { // 订单完全成交

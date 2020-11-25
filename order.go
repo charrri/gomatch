@@ -1,7 +1,9 @@
 package main
+
 import (
-	"fmt"
 	"math/rand"
+	"sync/atomic"
+	"time"
 )
 
 type Order struct {
@@ -14,6 +16,8 @@ type Order struct {
 }
 
 var ch = make(chan *Order, 10000)
+var bondChs [PRDUCT_NUM]chan *Order
+var ops uint64 = 0
 
 func orderSubmit(i int) {
 	ordr := &Order{
@@ -26,7 +30,22 @@ func orderSubmit(i int) {
 	ch <- ordr
 }
 
+func AddOrdrMpi(in chan *Order) {
+	for {
+		ordr := <-in
+		//fmt.Printf("new order dir=%d, price=%d, vol=%d, addr=%p\n", ordr.dir, ordr.price, ordr.vol, ordr)
+		AddOrder(ordr)
+		atomic.AddUint64(&ops, 1)
+		//fmt.Println(ops)
+	}
+}
+
 func main() {
+
+	for i := range bondChs {
+		bondChs[i] = make(chan *Order, 10000)
+		go AddOrdrMpi(bondChs[i])
+	}
 
 	// for i := 0; i < 10; i++ {
 	// 	go orderSubmit(i)
@@ -36,20 +55,28 @@ func main() {
 	// 	fmt.Printf("new order dir=%d, price=%d, vol=%d\n", msg.dir, msg.price, msg.vol)
 	// 	AddOrder(msg)
 	// }
-
-	for i := 0; i < 20; i++ {
+	for i := 0; i < ORDR_NUM; i++ {
 		ordr := &Order{
 			trdngAcntCd: 100001+ rand.Intn(10),
-			bondCd:      5,
+			bondCd:      1 + rand.Intn(PRDUCT_NUM-1),
 			price:       90 + rand.Intn(10),
 			//price: 90,
 			vol: 1000000 + 1000000*rand.Intn(5),
 			dir: rand.Intn(2)}
 
-		fmt.Printf("new order dir=%d, price=%d, vol=%d, addr=%p\n", ordr.dir, ordr.price, ordr.vol, ordr)
-		AddOrder(ordr)
+		bondChs[ordr.bondCd-1] <- ordr
+		//fmt.Printf("new order dir=%d, price=%d, vol=%d, addr=%p\n", ordr.dir, ordr.price, ordr.vol, ordr)
+		//AddOrder(ordr)
 	}
 
-	//ShowPrcLink(BUY, 5)
-	//ShowPrcLink(SELL, 5)
+	for {
+		if (ops == ORDR_NUM) {
+			break
+		}
+		time.Sleep(time.Millisecond*100)
+	}
+	for i:= range [PRDUCT_NUM]int{} {
+		ShowPrcLink(BUY, i)
+		ShowPrcLink(SELL, i)
+	}
 }
