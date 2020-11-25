@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9c2a1627-3d56-4ebe-b0e0-42910ad6e73f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/HelloWorld.go" beforeDir="false" afterPath="$PROJECT_DIR$/HelloWorld.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/match.go" beforeDir="false" afterPath="$PROJECT_DIR$/match.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/order.go" afterDir="false" />
-    </list>
+    <list default="true" id="9c2a1627-3d56-4ebe-b0e0-42910ad6e73f" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
