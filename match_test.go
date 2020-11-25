@@ -13,8 +13,8 @@ cmd:
 func BenchmarkAddOrder(B *testing.B) {
 	for i:=0;i<B.N;i++ {
 		ordr := &Order{
-			trdngAcntCd: 100001,
-			bondCd:      5,
+			trdngAcntCd: 100000 + rand.Intn(100000),
+			bondCd:      1 + rand.Intn(PRDUCT_NUM - 1),
 			price:       90 + rand.Intn(10),
 			//price: 90,
 			vol: 1000000 + 1000000*rand.Intn(5),
