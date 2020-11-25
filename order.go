@@ -50,4 +50,6 @@ func main() {
 		AddOrder(ordr)
 	}
 
+	ShowPrcLink(BUY, 5)
+	ShowPrcLink(SELL, 5)
 }
