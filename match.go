@@ -32,13 +32,11 @@ const (
 
 var prcLinks [2]map[int]*treemap.Map // int.List
 
-//var prcLinks *treemap.Map
-
 func AddOrder(ordr *Order) {
 	match(ordr)
-	if (ordr.vol > 0) {
+	if ordr.vol > 0 {
 		addOrdrToSameDir(ordr)
-	}else {
+	} else {
 		//to do trd txnlog msg
 		//to do del txnlog msg
 	}
@@ -78,8 +76,10 @@ func CheckPriceCanDeal(ordrDir int, ordrPrc int, bkPrc int) bool {
 	}
 	return false
 }
-func CheckAccountCanDeal(ordrAcnt int,bkAcnt int) bool{
-	if ordrAcnt==bkAcnt {return false}
+func CheckAccountCanDeal(ordrAcnt int, bkAcnt int) bool {
+	if ordrAcnt == bkAcnt {
+		return false
+	}
 	return true
 }
 
@@ -113,10 +113,10 @@ func match(ordr *Order) {
 			//isTrade = true
 			for node := pList.Front(); node != nil; node = node.Next() {
 				o := node.Value.(*Order)
-                if !CheckAccountCanDeal(ordr.trdngAcntCd,o.trdngAcntCd) {
-                	//fmt.Printf("same trading account,skip\n")
-                	continue
-                }
+				if !CheckAccountCanDeal(ordr.trdngAcntCd, o.trdngAcntCd) {
+					//fmt.Printf("same trading account,skip\n")
+					continue
+				}
 				if o.vol >= ordr.vol { // 订单完全成交
 					trd.vol += ordr.vol
 					o.vol -= ordr.vol
@@ -126,9 +126,9 @@ func match(ordr *Order) {
 					}
 
 					//trade(ordr, o, &trd) // to do
-					//fmt.Printf("Trade: %v\n", trd)
+					fmt.Printf("Trade: %v\n", trd)
 					return
-				} else {
+				} else { // 订单薄订单部分成交
 					trd.vol += ordr.vol
 					ordr.vol -= o.vol
 					o.vol = 0
@@ -136,7 +136,7 @@ func match(ordr *Order) {
 				}
 			}
 
-			// 此价格成交完
+			// 此价格遍历完
 		} else {
 			return
 		}
@@ -156,9 +156,9 @@ func match(ordr *Order) {
 
 func getOrdrBkNextPriceLinkByInOrdrDir(dir int, prc int, m *treemap.Map) (int, *list.List) {
 	var dir_ int
-	if (dir == BUY) {
+	if dir == BUY {
 		dir_ = SELL
-	}else {
+	} else {
 		dir_ = BUY
 	}
 	return getNextPriceLink(dir_, prc, m)
@@ -256,12 +256,12 @@ func ShowOrdrLink(node *list.List) {
 	if head != nil {
 		o := head.Value.(*Order)
 		PrintPriceLeader(o)
-	}else {
+	} else {
 		return
 	}
 
 	for {
-		if (head == nil) {
+		if head == nil {
 			fmt.Println()
 			break
 		}
@@ -272,15 +272,15 @@ func ShowOrdrLink(node *list.List) {
 }
 
 func PrintPriceLeader(ordr *Order) {
-	var dir string;
+	var dir string
 	if ordr.dir == 1 {
 		dir = "Sell"
-	}else {
+	} else {
 		dir = "Buy"
 	}
 	fmt.Printf("{bondCd:%d, prc:%d, dir:%s}\n", ordr.bondCd, ordr.price, dir)
 }
 
 func PrintOrdr(ordr *Order) {
-	fmt.Printf("[AcntCd:%d, Vol:%d]", ordr.trdngAcntCd, ordr.vol)//to do ordrCd
+	fmt.Printf("[AcntCd:%d, Vol:%d]", ordr.trdngAcntCd, ordr.vol) //to do ordrCd
 }

@@ -55,9 +55,10 @@ func main() {
 	// 	fmt.Printf("new order dir=%d, price=%d, vol=%d\n", msg.dir, msg.price, msg.vol)
 	// 	AddOrder(msg)
 	// }
+
 	for i := 0; i < ORDR_NUM; i++ {
 		ordr := &Order{
-			trdngAcntCd: 100001+ rand.Intn(10),
+			trdngAcntCd: 100001 + rand.Intn(10),
 			bondCd:      1 + rand.Intn(PRDUCT_NUM-1),
 			price:       90 + rand.Intn(10),
 			//price: 90,
@@ -70,12 +71,12 @@ func main() {
 	}
 
 	for {
-		if (ops == ORDR_NUM) {
+		if ops == ORDR_NUM {
 			break
 		}
-		time.Sleep(time.Millisecond*100)
+		time.Sleep(time.Millisecond * 100)
 	}
-	for i:= range [PRDUCT_NUM]int{} {
+	for i := range [PRDUCT_NUM]int{} {
 		ShowPrcLink(BUY, i)
 		ShowPrcLink(SELL, i)
 	}
