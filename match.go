@@ -235,7 +235,7 @@ func ShowPrcLink(dir int, bondCd int) {
 		ShowOrdrLink(li)
 	}
 	for {
-		if key, li = getNextPriceLink(1-dir, key, prcLink); li == nil {
+		if key, li = getNextPriceLink(dir, key, prcLink); li == nil {
 			return
 		}
 		ShowOrdrLink(li)
