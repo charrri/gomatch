@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "./common_order"
 	"math/rand"
 	"testing"
 	"time"
@@ -20,20 +21,20 @@ func BenchmarkAddOrder(B *testing.B) {
 
 	for i:=0;i<B.N;i++ {
 		ordr := &Order{
-			trdngAcntCd: 100000 + rand.Intn(100000),
-			bondCd:      1 + rand.Intn(PRDUCT_NUM - 1),
-			price:       90 + rand.Intn(10),
+			TrdngAcntCd: 100000 + rand.Intn(100000),
+			BondCd:      1 + rand.Intn(PRDUCT_NUM - 1),
+			Price:       90 + rand.Intn(10),
 			//price: 90,
-			vol: 1000000 + 1000000*rand.Intn(5),
-			dir: rand.Intn(2)}
+			Vol: 1000000 + 1000000*rand.Intn(5),
+			Dir: rand.Intn(2)}
 		//fmt.Printf("new order dir=%d, price=%d, vol=%d, addr=%p\n", ordr.dir, ordr.price, ordr.vol, ordr)
-		//AddOrder(ordr)
-		bondChs[ordr.bondCd-1] <- ordr
+		PutOrdr2Queue(ordr)
+		//bondChs[ordr.BondCd-1] <- ordr
 		cnt++
 	}
 
 	for {
-		if (ops >= cnt) {
+		if (gAddedOrderCnt >= cnt) {
 			break
 		}
 		time.Sleep(time.Millisecond*100)

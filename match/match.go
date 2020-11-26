@@ -1,11 +1,12 @@
 // match
-package main
+package match
 
 import (
+	. "../common_order"
 	"container/list"
 	"fmt"
-
 	"github.com/emirpasic/gods/maps/treemap"
+	"sync/atomic"
 )
 
 // type prcLinks struct {
@@ -23,20 +24,13 @@ type Trade struct {
 	dir             int //方向
 }
 
-const (
-	BUY        = 0
-	SELL       = 1
-	PRDUCT_NUM = 20 // 合约数量
-	ORDR_NUM   = 10000
-)
-
 var prcLinks [2]map[int]*treemap.Map // int.List
-
+var GTradeCnt uint64 = 0
 //var prcLinks *treemap.Map
 
 func AddOrder(ordr *Order) {
 	match(ordr)
-	if (ordr.vol > 0) {
+	if (ordr.Vol > 0) {
 		addOrdrToSameDir(ordr)
 	}else {
 		//to do trd txnlog msg
@@ -49,16 +43,16 @@ func AddOrder(ordr *Order) {
 
 func addOrdrToSameDir(ordr *Order) {
 	//fmt.Printf("Add order: %v\n", *ordr)
-	if nil == prcLinks[ordr.dir][ordr.bondCd] {
-		prcLinks[ordr.dir][ordr.bondCd] = treemap.NewWithIntComparator()
+	if nil == prcLinks[ordr.Dir][ordr.BondCd] {
+		prcLinks[ordr.Dir][ordr.BondCd] = treemap.NewWithIntComparator()
 	}
 
-	link := prcLinks[ordr.dir][ordr.bondCd]
-	pValue, r := link.Get(ordr.price)
+	link := prcLinks[ordr.Dir][ordr.BondCd]
+	pValue, r := link.Get(ordr.Price)
 	if false == r {
 		l := list.New()
 		l.PushBack(ordr)
-		link.Put(ordr.price, l)
+		link.Put(ordr.Price, l)
 	} else {
 		pList := pValue.(*list.List)
 		pList.PushBack(ordr)
@@ -87,9 +81,9 @@ func match(ordr *Order) {
 	var trd Trade
 	var key int
 	var li *list.List
-	d := reverseDir(ordr.dir)
+	d := reverseDir(ordr.Dir)
 
-	prcLink := prcLinks[d][ordr.bondCd]
+	prcLink := prcLinks[d][ordr.BondCd]
 
 	if d == BUY { // 最优价
 		k, v := prcLink.Max()
@@ -108,30 +102,30 @@ func match(ordr *Order) {
 	}
 
 	for {
-		if CheckPriceCanDeal(ordr.dir, ordr.price, key) {
+		if CheckPriceCanDeal(ordr.Dir, ordr.Price, key) {
 			pList := li
 			//isTrade = true
 			for node := pList.Front(); node != nil; node = node.Next() {
 				o := node.Value.(*Order)
-                if !CheckAccountCanDeal(ordr.trdngAcntCd,o.trdngAcntCd) {
+                if !CheckAccountCanDeal(ordr.TrdngAcntCd,o.TrdngAcntCd) {
                 	//fmt.Printf("same trading account,skip\n")
                 	continue
                 }
-				if o.vol >= ordr.vol { // 订单完全成交
-					trd.vol += ordr.vol
-					o.vol -= ordr.vol
-					ordr.vol = 0
-					if o.vol == 0 {
+				if o.Vol >= ordr.Vol { // 订单完全成交
+					trd.vol += ordr.Vol
+					o.Vol -= ordr.Vol
+					ordr.Vol = 0
+					if o.Vol == 0 {
 						pList.Remove(node) //
 					}
-
+					atomic.AddUint64(&GTradeCnt, 1)
 					//trade(ordr, o, &trd) // to do
 					//fmt.Printf("Trade: %v\n", trd)
 					return
 				} else {
-					trd.vol += ordr.vol
-					ordr.vol -= o.vol
-					o.vol = 0
+					trd.vol += ordr.Vol
+					ordr.Vol -= o.Vol
+					o.Vol = 0
 					pList.Remove(node)
 				}
 			}
@@ -140,7 +134,7 @@ func match(ordr *Order) {
 		} else {
 			return
 		}
-		key, li = getOrdrBkNextPriceLinkByInOrdrDir(ordr.dir, key, prcLink)
+		key, li = getOrdrBkNextPriceLinkByInOrdrDir(ordr.Dir, key, prcLink)
 		if li == nil {
 			return
 		}
@@ -273,14 +267,14 @@ func ShowOrdrLink(node *list.List) {
 
 func PrintPriceLeader(ordr *Order) {
 	var dir string;
-	if ordr.dir == 1 {
+	if ordr.Dir == 1 {
 		dir = "Sell"
 	}else {
 		dir = "Buy"
 	}
-	fmt.Printf("{bondCd:%d, prc:%d, dir:%s}\n", ordr.bondCd, ordr.price, dir)
+	fmt.Printf("{bondCd:%d, prc:%d, dir:%s}\n", ordr.BondCd, ordr.Price, dir)
 }
 
 func PrintOrdr(ordr *Order) {
-	fmt.Printf("[AcntCd:%d, Vol:%d]", ordr.trdngAcntCd, ordr.vol)//to do ordrCd
+	fmt.Printf("[AcntCd:%d, Vol:%d]", ordr.TrdngAcntCd, ordr.Vol) //to do ordrCd
 }
